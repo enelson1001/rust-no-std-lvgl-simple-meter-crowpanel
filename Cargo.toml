@@ -1,0 +1,121 @@
+[package]
+edition      = "2024"
+name         = "rust-no-std-lvgl-simple-meter-crowpanel"
+rust-version = "1.88"
+version      = "0.1.0"
+
+[[bin]]
+name = "rust-no-std-lvgl-simple-meter-crowpanel"
+path = "./src/bin/main.rs"
+
+[dependencies]
+# ESP_HAL
+esp-hal = { version = "1.0.0", features = ["esp32s3", "unstable", "psram", "log-04", "rt"] }
+esp-rtos = { version = "0.2.0", features = [
+  "embassy",
+  "esp-alloc",
+  "esp-radio",
+  "esp32s3",
+] }
+
+esp-bootloader-esp-idf = { version = "0.4.0", features = ["esp32s3"] }
+esp-alloc = "0.9.0"
+esp-radio = { version = "0.17.0", features = [
+  "esp-alloc",
+  "esp32s3",
+  "smoltcp",
+  "unstable",
+  "wifi",
+] }
+
+esp-backtrace = { version = "0.18.0", features = [
+  "esp32s3",
+  #"exception-handler",
+  "panic-handler",
+  "println",
+] }
+esp-println = { version = "0.16.0", features = ["esp32s3", "log-04"] }
+
+xtensa-lx = "0.13.0"
+
+# Embassy
+embassy-net = { version = "0.8.0", features = [
+  "dhcpv4",
+  "medium-ethernet",
+  "tcp",
+  "udp",
+] }
+embassy-executor = { version = "0.9.1", features = [] }
+embassy-sync = "0.7.2"
+embassy-time = "0.5.0"
+embassy-embedded-hal = "0.5.0"
+embassy-futures = "0.1"
+
+
+# Networking Stuff
+smoltcp = { version = "0.12.0", default-features = false, features = [
+  "medium-ethernet",
+  "multicast",
+  "proto-dhcpv4",
+  "proto-dns",
+  "proto-ipv4",
+  "socket-dns",
+  "socket-icmp",
+  "socket-raw",
+  "socket-tcp",
+  "socket-udp",
+] }
+
+# Embedded traits
+embedded-io = "0.7.1"
+embedded-io-async = "0.7.0"
+embedded-hal-async = "1.0.0"
+
+# Critical Section
+critical-section = "1.2.0"
+
+# Static Cell
+static_cell      = "2.1.1"
+
+# Logging
+log = { version = "0.4.27" }
+
+# Stack-Allocated String and Vec types
+heapless = { version = "0.9.2", default-features = false }
+
+# GT911 Driver
+gt911 = "0.3.0"
+
+# RTC Clock driver
+pcf8563-async = { git = "https://github.com/nebelgrau77/pcf8563-rs-async.git", branch = "dev" }
+
+# Bitflags
+bitflags = "2.10.0"
+
+[profile.dev]
+# Rust debug is too slow.
+# For debug builds always builds with some optimization
+opt-level = "s"
+
+[profile.release]
+codegen-units    = 1     # LLVM can perform better optimizations using a single thread
+debug            = 2
+debug-assertions = false
+incremental      = false
+lto              = 'fat'
+opt-level        = 's'
+overflow-checks  = false
+
+
+[patch.crates-io]
+# Required for PSRAM - XIP
+esp-alloc = { git = "https://github.com/enelson1001/esp-hal.git", branch = "1.0.0"}
+esp-hal = { git = "https://github.com/enelson1001/esp-hal.git", branch = "1.0.0"}
+esp-rom-sys = { git = "https://github.com/enelson1001/esp-hal.git", branch = "1.0.0"}
+xtensa-lx-rt = { git = "https://github.com/enelson1001/esp-hal.git", branch = "1.0.0"}
+
+[build-dependencies]
+# These are required so build.rs can use them to build lvgl
+bindgen = "0.72.1"
+cc = "1.2.56"
+glob = "0.3.0"

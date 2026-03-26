@@ -1,0 +1,23 @@
+[target.xtensa-esp32s3-none-elf]
+runner = "espflash flash --monitor --chip esp32s3"
+
+[env]
+ESP_LOG="INFO"
+ESP_HAL_CONFIG_PSRAM_MODE = "octal"
+
+# Required to make lvgl build correctly otherwise get wrong file type (ie compiled for a big endian system and target is little endian)
+CROSS_COMPILE = "xtensa-esp32-elf"
+
+# Required for lvgl otherwise the build would fail with the error -> dangerous relocation: call8: call target out of range
+# for some lvgl functions
+CFLAGS_xtensa_esp32s3_none_elf="-mlongcalls"
+
+[build]
+rustflags = [
+  "-C", "link-arg=-nostartfiles",
+]
+
+target = "xtensa-esp32s3-none-elf"
+
+[unstable]
+build-std = ["alloc", "core"]
