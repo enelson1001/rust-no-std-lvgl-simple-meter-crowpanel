@@ -59,6 +59,7 @@ use esp_hal::{
             dpi::{self, Dpi, Format, FrameTiming},
         },
     },
+    ram,
     time::Rate,
     timer::timg::TimerGroup,
 };
@@ -243,7 +244,7 @@ async fn main(spawner: Spawner) -> ! {
     // Allocate framebuffer in PSRAM, Box::leak(vec![...]) ensures this lands in the PSRAM heap
     let fb1_raw: &'static mut [u8] = Box::leak(vec![0x00u8; FRAMEBUFFER_SIZE].into_boxed_slice());
     let fb1_ptr = fb1_raw.as_mut_ptr();
-    FB1_ADDR.store(fb1_ptr, Ordering::Relaxed);
+    FB1_ADDR.store(fb1_ptr, Ordering::Release);
 
     // For testing; won't be displayed if using lvgl page because lvgl page will overwrite
     // But if we want test to see if display is working we can comment out the following lvgl
@@ -290,6 +291,7 @@ async fn main(spawner: Spawner) -> ! {
     }
 }
 
+#[ram]
 #[embassy_executor::task]
 async fn display_engine_task(mut dpi: Dpi<'static, Blocking>, mut bb_dma: BounceBufferDma) {
     // If clock is 240MHz, this is 466 * 240.
@@ -309,7 +311,7 @@ async fn display_engine_task(mut dpi: Dpi<'static, Blocking>, mut bb_dma: Bounce
 
         // Chunk Loop, one chunk equals 12 lines
         let mut current_chunk = 0;
-        while current_chunk < 40 {
+        while current_chunk < 39 {
             let start_of_chunk = xtensa_lx::timer::get_cycle_count();
 
             // While the previous chunk is in flight to the display fill the next chunk
